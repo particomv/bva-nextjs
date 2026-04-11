@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vertical Menu with Gooey Effect</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root {
+      --bg: #1e3a5f;
+      --bg-deep: #14253d;
+      --navbar-bg: #ffffff;
+      --navbar-bg-2: #f3f5fa;
+      --text-color: #6b7a90;
+      --text-active: #ffffff;
+      --accent: #3b6dff;
+      --accent-2: #5a86ff;
+      --shadow-sm: 0 4px 14px rgba(20, 37, 61, 0.08);
+      --shadow-md: 0 18px 40px rgba(20, 37, 61, 0.18);
+      --border-radius: 28px;
+      --transition-fast: 0.4s cubic-bezier(0.65, 0, 0.35, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      height: 100%;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at 30% 20%, #244c7a 0%, var(--bg) 40%, var(--bg-deep) 100%);
+      overflow: hidden;
+      padding: 24px;
+    }
+
+    /* The gooey filter is applied to the wrapper so the active blob
+       and the tooltip pill visually melt into one another. */
+    .navbar-wrapper {
+      position: relative;
+      filter: url('#gooey');
+      display: flex;
+      align-items: center;
+    }
+
+    .navbar {
+      position: relative;
+      background: var(--navbar-bg);
+      border-radius: var(--border-radius);
+      padding: 1.5rem 0;
+      box-shadow: var(--shadow-md);
+      transition: box-shadow var(--transition-fast);
+      width: 88px;
+      z-index: 2;
+    }
+
+    .navbar:hover {
+      box-shadow: 0 24px 60px rgba(20, 37, 61, 0.28);
+    }
+
+    .navbar_menu {
+      list-style: none;
+      position: relative;
+      margin: 0;
+      padding: 0;
+    }
+
+    .navbar_item {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .navbar_link {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 56px;
+      width: 88px;
+      color: var(--text-color);
+      text-decoration: none;
+      transition: color var(--transition-fast);
+      z-index: 2;
+    }
+
+    .navbar_link svg {
+      width: 22px;
+      height: 22px;
+      stroke-width: 2;
+      transition: transform var(--transition-fast);
+    }
+
+    .navbar_link:hover {
+      color: var(--accent);
+    }
+
+    .navbar_link:hover svg {
+      transform: scale(1.1);
+    }
+
+    /* Active blob (the blue rounded square that follows the active link) */
+    .navbar_indicator {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+      transform: translate(-50%, 2px);
+      transition: top var(--transition-fast);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .navbar_link.is-active {
+      color: var(--text-active);
+    }
+
+    /* Tooltip pill that floats out and connects via the gooey filter */
+    .navbar_tooltip {
+      position: absolute;
+      left: 100%;
+      top: 0;
+      margin-left: 18px;
+      background: var(--navbar-bg);
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 14px 26px;
+      border-radius: 18px;
+      box-shadow: var(--shadow-sm);
+      white-space: nowrap;
+      transition: top var(--transition-fast), opacity 0.25s ease;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Theme toggle separator */
+    .navbar_item.is-divider {
+      margin-top: 12px;
+      padding-top: 16px;
+      position: relative;
+    }
+
+    .navbar_item.is-divider::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 22%;
+      right: 22%;
+      height: 1px;
+      background: rgba(107, 122, 144, 0.18);
+    }
+
+    /* Footer credit */
+    .credit {
+      position: fixed;
+      bottom: 20px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.55);
+      font-size: 0.78rem;
+      letter-spacing: 0.05em;
+    }
+
+    /* Dark theme */
+    body.is-dark {
+      background: radial-gradient(circle at 30% 20%, #1a1a2e 0%, #0f0f1e 60%, #06060f 100%);
+    }
+
+    body.is-dark {
+      --navbar-bg: #20243a;
+      --text-color: #8a94ad;
+    }
+
+    body.is-dark .navbar_tooltip {
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+  <!-- SVG gooey filter -->
+  <svg width="0" height="0" style="position: absolute">
+    <defs>
+      <filter id="gooey">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur" />
+        <feColorMatrix
+          in="blur"
+          mode="matrix"
+          values="1 0 0 0 0
+                  0 1 0 0 0
+                  0 0 1 0 0
+                  0 0 0 20 -10"
+          result="goo"
+        />
+        <feBlend in="SourceGraphic" in2="goo" />
+      </filter>
+    </defs>
+  </svg>
+
+  <div class="navbar-wrapper">
+    <nav class="navbar" aria-label="Main navigation">
+      <ul class="navbar_menu" id="menu">
+        <li class="navbar_item">
+          <a href="#" class="navbar_link" data-label="Stats">
+            <!-- bar chart 1 -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+          </a>
+        </li>
+        <li class="navbar_item">
+          <a href="#" class="navbar_link" data-label="Reports">
+            <!-- bar chart 2 -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="12" width="4" height="9" rx="1"></rect>
+              <rect x="10" y="6" width="4" height="15" rx="1"></rect>
+              <rect x="17" y="9" width="4" height="12" rx="1"></rect>
+            </svg>
+          </a>
+        </li>
+        <li class="navbar_item">
+          <a href="#" class="navbar_link is-active" data-label="Team">
+            <!-- team -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </a>
+        </li>
+        <li class="navbar_item">
+          <a href="#" class="navbar_link" data-label="Calendar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+          </a>
+        </li>
+        <li class="navbar_item">
+          <a href="#" class="navbar_link" data-label="Notifications">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+          </a>
+        </li>
+        <li class="navbar_item">
+          <a href="#" class="navbar_link" data-label="Documents">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </a>
+        </li>
+        <li class="navbar_item">
+          <a href="#" class="navbar_link" data-label="Profile">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </a>
+        </li>
+        <li class="navbar_item is-divider">
+          <a href="#" class="navbar_link" id="theme-toggle" data-label="Theme">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+          </a>
+        </li>
+      </ul>
+
+      <!-- The blob that morphs between active items -->
+      <span class="navbar_indicator" id="indicator"></span>
+    </nav>
+
+    <!-- Tooltip pill (floats outside, connected via gooey filter) -->
+    <span class="navbar_tooltip" id="tooltip">Team</span>
+  </div>
+
+  <p class="credit">Vertical menu with gooey effect — HTML / CSS / JS</p>
+
+  <script>
+    const menu = document.getElementById('menu');
+    const indicator = document.getElementById('indicator');
+    const tooltip = document.getElementById('tooltip');
+    const links = menu.querySelectorAll('.navbar_link');
+    const themeToggle = document.getElementById('theme-toggle');
+
+    function moveTo(link) {
+      const item = link.parentElement;
+      const top = item.offsetTop + (link.offsetHeight - indicator.offsetHeight) / 2;
+      indicator.style.top = top + 'px';
+      tooltip.style.top = top + 'px';
+      tooltip.textContent = link.dataset.label;
+    }
+
+    links.forEach((link) => {
+      link.addEventListener('click', (e) => {
+        if (link.id === 'theme-toggle') {
+          e.preventDefault();
+          document.body.classList.toggle('is-dark');
+          return;
+        }
+        e.preventDefault();
+        links.forEach((l) => l.classList.remove('is-active'));
+        link.classList.add('is-active');
+        moveTo(link);
+      });
+
+      link.addEventListener('mouseenter', () => moveTo(link));
+    });
+
+    // Snap back to whichever item is currently active when the
+    // pointer leaves the menu.
+    menu.addEventListener('mouseleave', () => {
+      const active = menu.querySelector('.navbar_link.is-active');
+      if (active) moveTo(active);
+    });
+
+    // Initial position
+    window.addEventListener('load', () => {
+      const active = menu.querySelector('.navbar_link.is-active');
+      if (active) moveTo(active);
+    });
+  </script>
+</body>
+</html>
